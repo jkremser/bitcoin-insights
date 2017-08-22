@@ -1,3 +1,13 @@
 language: scala
+
 scala:
-   - 2.11.11
+  - 2.11.11
+
+services:
+  - docker
+
+script:
+  - cd parquet-converter
+  - sbt ++2.11.11 clean assembly test
+  - cd ../notebook
+  - make build
