@@ -1,4 +1,5 @@
 # Bitcoin Insights
+[![Build status](https://travis-ci.org/Jiri-Kremser/bitcoin-insights.svg?branch=master)](https://travis-ci.org/Jiri-Kremser/bitcoin-insights)
 
 ## Converter to Parguet
 
@@ -7,7 +8,7 @@ Bitcoin stores all the transactions in the binary format described [here](https:
 ### Building
 
 ```bash
-sbt clean install
+sbt clean assembly
 ```
 will create a jar file in `./target/scala-2.11/bitcoin-insights.jar`
 
