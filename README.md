@@ -8,7 +8,6 @@ Bitcoin stores all the transactions in the binary format described [here](https:
 ### Building
 
 ```bash
-cd 
 sbt clean assembly
 ```
 will create a jar file in `./target/scala-2.11/bitcoin-insights.jar`
