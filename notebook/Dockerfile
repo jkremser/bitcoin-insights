@@ -5,6 +5,8 @@ RUN mkdir /data
 
 ENV NB_USER=nbuser
 ENV NB_UID=1011
+ENV PYSPARK_DRIVER_PYTHON="jupyter"
+ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook"
 
 EXPOSE 8888
 
@@ -17,7 +19,18 @@ ADD blockchain.ipynb /notebooks/blockchain.ipynb
 
 USER root
 
-RUN chown -R $NB_USER:root /home/$NB_USER /data \
+RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphframes/graphframes/0.5.0-spark2.1-s_2.11/graphframes-0.5.0-spark2.1-s_2.11.jar \
+    && curl -L -O --progress-bar http://central.maven.org/maven2/com/typesafe/scala-logging/scala-logging-slf4j_2.11/2.1.2/scala-logging-slf4j_2.11-2.1.2.jar \
+    && curl -L -O --progress-bar http://central.maven.org/maven2/com/typesafe/scala-logging/scala-logging-api_2.11/2.1.2/scala-logging-api_2.11-2.1.2.jar \
+    && echo "56e120e4839005098ec0dfa5b69677c124788048 `ls graphframes-*`" | sha1sum -c - \
+    && echo "7628485be79eacac9e7f19bf049f581394d45ea3 `ls scala-logging-slf4j_*`" | sha1sum -c - \
+    && echo "fed5521041c26b8c1daa2d5e5dc5f01b9bde4fe6 `ls scala-logging-api_*`" | sha1sum -c - \
+    && chown 500:500 *.jar \
+    && chmod 666 *.jar \
+    && mv *.jar /opt/spark/jars/ \
+    && sed -i'' -e 's/^\(exec jupyter notebook\)$/#\1/' /start.sh \
+    && echo "pyspark $PYSPARK_SUBMIT_ARGS" >> /start.sh \
+    && chown -R $NB_USER:root /home/$NB_USER /data \
     && find /home/$NB_USER -type d -exec chmod g+rwx,o+rx {} \; \
     && find /home/$NB_USER -type f -exec chmod g+rw {} \; \
     && find /data -type d -exec chmod g+rwx,o+rx {} \; \
