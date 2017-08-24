@@ -7,6 +7,7 @@ ENV NB_USER=nbuser
 ENV NB_UID=1011
 ENV PYSPARK_DRIVER_PYTHON="jupyter"
 ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+ENV PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11"
 
 EXPOSE 8888
 
