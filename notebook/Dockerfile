@@ -17,6 +17,7 @@ ADD nodes.parquet /data/nodes.parquet
 ADD edges.parquet /data/edges.parquet
 
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
+ADD js /notebooks/js
 
 USER root
 
