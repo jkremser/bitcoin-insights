@@ -15,11 +15,17 @@ USER $NB_UID
 
 ADD nodes.parquet /data/nodes.parquet
 ADD edges.parquet /data/edges.parquet
-
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
+ADD custom /home/$NB_USER/.jupyter/custom
 ADD js /notebooks/js
 
 USER root
+
+# note to future me: here are some links so that you can continue after PTO :)
+# custom js - http://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/JavaScript%20Notebook%20Extensions.html
+# https://gist.github.com/pkerpedjiev/f2e6ebb2532dae603de13f0606563f5b
+# http://languagenetwork.cotrino.com/langnet.js
+# https://stackoverflow.com/questions/35946898/jupyter-input-cell-with-required-javascript-file-are-evaluated-at-page-load
 
 RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphframes/graphframes/0.5.0-spark2.1-s_2.11/graphframes-0.5.0-spark2.1-s_2.11.jar \
     && curl -L -O --progress-bar http://central.maven.org/maven2/com/typesafe/scala-logging/scala-logging-slf4j_2.11/2.1.2/scala-logging-slf4j_2.11-2.1.2.jar \
