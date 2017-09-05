@@ -1,5 +1,7 @@
 # Bitcoin Insights
 [![Build status](https://travis-ci.org/Jiri-Kremser/bitcoin-insights.svg?branch=master)](https://travis-ci.org/Jiri-Kremser/bitcoin-insights)
+[![Docker build](https://img.shields.io/docker/automated/jkremser/bitcoin-notebook.svg)](https://hub.docker.com/r/jkremser/bitcoin-notebook)
+[![Layers info](https://images.microbadger.com/badges/image/jkremser/bitcoin-notebook.svg)](https://microbadger.com/images/jkremser/bitcoin-notebook)
 
 ## Converter to Parguet
 
