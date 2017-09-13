@@ -41,11 +41,18 @@ object ParquetConverter {
   }
 
   def convert(sc: SparkContext, hadoopConf: Configuration, inputFile: String, outputDir: String): Unit = {
+    println("\n\n\n\n\n                          ********************WORKING0.5****************              \n\n\n\n\n\n\n\n")
     val bitcoinBlocksRDD = sc.newAPIHadoopFile(inputFile, classOf[BitcoinBlockFileInputFormat], classOf[BytesWritable], classOf[BitcoinBlock], hadoopConf)
 
     // extract a tuple per transaction containing Bitcoin destination address, the input transaction hash,
     // the input transaction output index, and the current transaction hash, the current transaction output index, a (generated) long identifier
     val bitcoinTransactionTuples = bitcoinBlocksRDD.flatMap(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
+
+//    // RDD[(BytesWritable, BitcoinBlock)]
+//    val foo = bitcoinBlocksRDD.collect()
+//    println("\n\n\n\n\n" + foo.size + "\n\n\n\n")
+//    foo.foreach(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
+//    println(foo)
 
     // create the vertex (vertexId, Bitcoin destination address), keep in mind that the flat table contains the same bitcoin address several times
     val bitcoinAddressIndexed = bitcoinTransactionTuples.map(bitcoinTransactions => bitcoinTransactions._1).distinct().zipWithIndex()
@@ -87,6 +94,7 @@ object ParquetConverter {
 
   // extract relevant data
   def extractTransactionData(bitcoinBlock: BitcoinBlock): Array[(String, Array[Byte], Long, Array[Byte], Long)] = {
+    println("\n\n\n\n\n                          ********************WORKING1****************              \n\n\n\n\n\n\n\n")
 
     // first we need to determine the size of the result set by calculating the total number of inputs
     // multiplied by the outputs of each transaction in the block
@@ -110,6 +118,18 @@ object ParquetConverter {
         for (k <- 0 to currentTransaction.getListOfOutputs().size() - 1) {
           val currentTransactionOutput = currentTransaction.getListOfOutputs().get(k)
           val currentTransactionOutputIndex = k.toLong
+
+          // example of multi-input multi-output tx: https://blockchain.info/tx/7c666411f52a2515f0593fc7ccd6e50a6b24150eb73df4b37fc8c1e174f5da15
+
+          // example of 'normal' tx: https://blockchain.info/tx/fb308839d7410a9b5ee9f4a7a36ab38908219d14141b607965640edf727445d1
+          // i.e. 1 sender, 1 receiver and sending back the rest
+          println("\n\n\n\n\n                          ********************TX****************              \n\n\n\n\n\n\n\n")
+          println("currentTransactionInputHash = " + currentTransactionInputHash)
+          println("currentTransactionHash = " + currentTransactionHash)
+          println("paymentDestination = " + BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()))
+          println("currentTransactionOutputIndex = " + currentTransactionOutputIndex)
+          println("value = " + currentTransactionOutput.getValue())
+
           result(resultCounter) = (BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()), currentTransactionInputHash, currentTransactionInputOutputIndex, currentTransactionHash, currentTransactionOutputIndex)
           resultCounter += 1
         }

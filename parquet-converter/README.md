@@ -12,7 +12,6 @@ Converter assumes the data in the HDFS and writes two parquet files (one with no
 ```bash
 spark-submit \
   --driver-memory 2G \
-  --num-executors 4 \
   --executor-memory 2G \
   --class io.radanalytics.bitcoin.ParquetConverter \
   --master local[8] \
