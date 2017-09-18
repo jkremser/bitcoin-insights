@@ -13,8 +13,8 @@ EXPOSE 8888
 
 USER $NB_UID
 
-ADD nodes.parquet /data/nodes.parquet
-ADD edges.parquet /data/edges.parquet
+ADD nodes /data/nodes.parquet
+ADD edges /data/edges.parquet
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
 ADD custom /home/$NB_USER/.jupyter/custom
 ADD js /notebooks/js
@@ -30,6 +30,8 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && conda install -y --quiet -c conda-forge jupyter_contrib_nbextensions \
     && jupyter nbextension enable toc2/main \
     && jupyter nbextension enable python-markdown/main \
+    && jupyter nbextension enable init_cell/main \
+    && jupyter trust /notebooks/blockchain.ipynb \
     && chown 500:500 *.jar \
     && chmod 666 *.jar \
     && mv *.jar /opt/spark/jars/ \

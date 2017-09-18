@@ -32,16 +32,19 @@ import org.zuinnote.hadoop.bitcoin.format.common._
 import org.zuinnote.hadoop.bitcoin.format.mapreduce._
 
 object ParquetConverter {
+  var debug = 0;
+
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("Bitcoin insights - ParquetConverter)")
     val sc = new SparkContext(conf)
     val hadoopConf = new Configuration();
+    if (args.size == 3) debug = args(2).toInt
     convert(sc, hadoopConf, args(0), args(1))
     sc.stop()
   }
 
-  def convert(sc: SparkContext, hadoopConf: Configuration, inputFile: String, outputDir: String): Unit = {
-    println("\n\n\n\n\n                          ********************WORKING0.5****************              \n\n\n\n\n\n\n\n")
+  def convert(sc: SparkContext, hadoopConf: Configuration, inputFile: String, outputDir: String) = {
+    if (debug == 1) println("\n\n\n\n\n                          ********************invoking convert()****************              \n\n\n\n\n\n\n\n")
     val bitcoinBlocksRDD = sc.newAPIHadoopFile(inputFile, classOf[BitcoinBlockFileInputFormat], classOf[BytesWritable], classOf[BitcoinBlock], hadoopConf)
 
     // extract a tuple per transaction containing Bitcoin destination address, the input transaction hash,
@@ -83,6 +86,8 @@ object ParquetConverter {
     // create edges
     val bitcoinTransactionEdges = joinedTransactions.map(joinTuple => Edge(joinTuple._2._1._1, joinTuple._2._2._1, "input"))
 
+    if (debug == 1) println("\n\n\n\n\n                          ********************saving parquet files****************              \n\n\n\n\n\n\n\n")
+
     // create two parquet files, one with nodes and second with edges
     val spark = SparkSession
       .builder()
@@ -94,7 +99,7 @@ object ParquetConverter {
 
   // extract relevant data
   def extractTransactionData(bitcoinBlock: BitcoinBlock): Array[(String, Array[Byte], Long, Array[Byte], Long)] = {
-    println("\n\n\n\n\n                          ********************WORKING1****************              \n\n\n\n\n\n\n\n")
+    if (debug == 1) println("\n\n\n\n\n                          ********************invoking extractTransactionData()****************              \n\n\n\n\n\n\n\n")
 
     // first we need to determine the size of the result set by calculating the total number of inputs
     // multiplied by the outputs of each transaction in the block
@@ -123,12 +128,14 @@ object ParquetConverter {
 
           // example of 'normal' tx: https://blockchain.info/tx/fb308839d7410a9b5ee9f4a7a36ab38908219d14141b607965640edf727445d1
           // i.e. 1 sender, 1 receiver and sending back the rest
-          println("\n\n\n\n\n                          ********************TX****************              \n\n\n\n\n\n\n\n")
-          println("currentTransactionInputHash = " + currentTransactionInputHash)
-          println("currentTransactionHash = " + currentTransactionHash)
-          println("paymentDestination = " + BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()))
-          println("currentTransactionOutputIndex = " + currentTransactionOutputIndex)
-          println("value = " + currentTransactionOutput.getValue())
+          if (debug == 2) {
+            println("\n\n\n\n\n                          ********************TX****************              \n\n\n\n\n\n\n\n")
+            println("currentTransactionInputHash = " + currentTransactionInputHash)
+            println("currentTransactionHash = " + currentTransactionHash)
+            println("paymentDestination = " + BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()))
+            println("currentTransactionOutputIndex = " + currentTransactionOutputIndex)
+            println("value = " + currentTransactionOutput.getValue())
+          }
 
           result(resultCounter) = (BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()), currentTransactionInputHash, currentTransactionInputOutputIndex, currentTransactionHash, currentTransactionOutputIndex)
           resultCounter += 1

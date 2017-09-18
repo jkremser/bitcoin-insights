@@ -1,14 +1,15 @@
 LOCAL_IMAGE=$(USER)/bitcoin-notebook
 RANDOM := $(shell bash -c 'echo $$$$')
 TEST_CONTAINER="test-bitcoin-notebook-$(RANDOM)"
+GRAPH_DATA=$(HOME)/bitcoin/output/*
 
 
 .PHONY: build clean run test
 
 build:
-	cp -r ../parquet-converter/data/example1/output/* .
+	cp -r $(GRAPH_DATA) .
 	docker build -t $(LOCAL_IMAGE) .
-	rm *.parquet
+	rm -rf edges nodes
 
 clean:
 	-docker rmi -f $(LOCAL_IMAGE)
