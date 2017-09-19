@@ -50,6 +50,7 @@ object ParquetConverter {
     // extract a tuple per transaction containing Bitcoin destination address, the input transaction hash,
     // the input transaction output index, and the current transaction hash, the current transaction output index, a (generated) long identifier
     val bitcoinTransactionTuples = bitcoinBlocksRDD.flatMap(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
+//    bitcoinTransactionTuples.cache()
 
 //    // RDD[(BytesWritable, BitcoinBlock)]
 //    val foo = bitcoinBlocksRDD.collect()
@@ -59,6 +60,7 @@ object ParquetConverter {
 
     // create the vertex (vertexId, Bitcoin destination address), keep in mind that the flat table contains the same bitcoin address several times
     val bitcoinAddressIndexed = bitcoinTransactionTuples.map(bitcoinTransactions => bitcoinTransactions._1).distinct().zipWithIndex()
+//    bitcoinAddressIndexed.cache()
 
     // create the edges (bitcoinAddress,(byteArrayTransaction, TransactionIndex)
     val inputTransactionTuple = bitcoinTransactionTuples.map(bitcoinTransactions =>
