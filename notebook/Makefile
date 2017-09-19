@@ -7,9 +7,10 @@ GRAPH_DATA=$(HOME)/bitcoin/output/*
 .PHONY: build clean run test
 
 build:
-	cp -r $(GRAPH_DATA) .
+	-mkdir -o $(GRAPH_DATA)
+	-cp -r $(GRAPH_DATA) .
 	docker build -t $(LOCAL_IMAGE) .
-	rm -rf edges nodes
+	-rm -rf edges nodes
 
 clean:
 	-docker rmi -f $(LOCAL_IMAGE)

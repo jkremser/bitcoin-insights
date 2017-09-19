@@ -9,12 +9,12 @@ mkdir -p $HOME/tmp
 rm -rf $INPUT_DIR/*
 
 # following command assumes the default bitcoin client to be installed and present in the home directory
-# copy the first 3 block files
-cp $HOME/.bitcoin/blocks/blk00{0,1}{0..9}{0..9}.dat $INPUT_DIR
-cp $HOME/.bitcoin/blocks/blk00200.dat $INPUT_DIR
+# copy a file that contains serialized blocks
+cp $HOME/.bitcoin/blocks/blk00003.dat $INPUT_DIR
 
-#cp $HOME/.bitcoin/blocks/blk00003.dat $INPUT_DIR
-
+# first 200
+#cp $HOME/.bitcoin/blocks/blk00{0,1}{0..9}{0..9}.dat $INPUT_DIR
+#cp $HOME/.bitcoin/blocks/blk00200.dat $INPUT_DIR
 
 hadoop fs -rm -R -f $OUTPUT_DIR
 
