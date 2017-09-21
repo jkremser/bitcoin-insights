@@ -3,18 +3,20 @@ FROM jkremser/base-notebook
 USER root
 RUN mkdir /data
 
-ENV NB_USER=nbuser
-ENV NB_UID=1011
-ENV PYSPARK_DRIVER_PYTHON="jupyter"
-ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook"
-ENV PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11"
+ENV NB_USER=nbuser \
+    NB_UID=1011 \
+    PYSPARK_DRIVER_PYTHON="jupyter" \
+    PYSPARK_DRIVER_PYTHON_OPTS="notebook" \
+    PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11"
 
 EXPOSE 8888
 
 USER $NB_UID
+RUN mkdir /tmp/data/
 
-ADD nodes /data/nodes.parquet
-ADD edges /data/edges.parquet
+ADD nodes /tmp/data/nodes.parquet
+ADD edges /tpm/data/edges.parquet
+ADD graphframes.ipynb /notebooks/graphframes.ipynb
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
 ADD custom /home/$NB_USER/.jupyter/custom
 ADD js /notebooks/js
