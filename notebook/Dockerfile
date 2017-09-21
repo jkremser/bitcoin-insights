@@ -1,4 +1,4 @@
-FROM radanalyticsio/base-notebook
+FROM jkremser/base-notebook
 
 USER root
 RUN mkdir /data
@@ -36,7 +36,7 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && chmod 666 *.jar \
     && mv *.jar /opt/spark/jars/ \
     && sed -i'' -e 's/^\(exec jupyter notebook\)$/#\1/' /start.sh \
-    && echo "pyspark $PYSPARK_SUBMIT_ARGS" >> /start.sh \
+    && echo "pyspark \$PYSPARK_SUBMIT_ARGS" >> /start.sh \
     && chown -R $NB_USER:root /home/$NB_USER /data \
     && find /home/$NB_USER -type d -exec chmod g+rwx,o+rx {} \; \
     && find /home/$NB_USER -type f -exec chmod g+rw {} \; \
