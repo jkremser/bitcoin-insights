@@ -1,6 +1,13 @@
 var g = $graph_data ;
 
-s = new sigma({graph: g, container: '$container', settings: { defaultNodeColor: '#ec5148'} });
+s = new sigma({graph: g, container: '$container', settings: { defaultNodeColor: '#ec5148',
+                                                              defaultEdgeColor: '#999',
+                                                              edgeColor: 'default',
+                                                              minArrowSize: 10,
+                                                              borderSize: 2,
+                                                              defaultNodeHoverColor: '#555',
+                                                              drawEdgeLabels: true
+                                                            } });
 
 s.graph.nodes().forEach(function(n) {
   n.originalColor = n.color;

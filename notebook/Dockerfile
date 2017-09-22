@@ -1,4 +1,4 @@
-FROM radanalytics/base-notebook
+FROM jkremser/base-notebook
 
 USER root
 RUN mkdir /data
@@ -34,6 +34,7 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && jupyter nbextension enable python-markdown/main \
     && jupyter nbextension enable init_cell/main \
     && jupyter trust /notebooks/blockchain.ipynb \
+    && jupyter trust /notebooks/graphframes.ipynb \
     && chown 500:500 *.jar \
     && chmod 666 *.jar \
     && mv *.jar /opt/spark/jars/ \
