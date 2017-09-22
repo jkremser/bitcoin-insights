@@ -1,4 +1,4 @@
-FROM jkremser/base-notebook
+FROM radanalytics/base-notebook
 
 USER root
 RUN mkdir /data
