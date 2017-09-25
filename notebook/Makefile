@@ -16,4 +16,4 @@ clean:
 	-docker rmi -f $(LOCAL_IMAGE)
 
 run:
-	docker run -ti -p 8888:8888 -e JUPYTER_NOTEBOOK_PASSWORD=dev $(LOCAL_IMAGE)
+	docker run -ti -p 8888:8888 $(LOCAL_IMAGE)
