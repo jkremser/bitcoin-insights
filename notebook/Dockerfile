@@ -14,8 +14,8 @@ EXPOSE 8888
 USER $NB_UID
 RUN mkdir /tmp/data/
 
-ADD nodes /tmp/data/nodes.parquet
-ADD edges /tpm/data/edges.parquet
+ADD nodes /tmp/nodes.parquet
+ADD edges /tmp/edges.parquet
 ADD graphframes.ipynb /notebooks/graphframes.ipynb
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
 ADD custom /home/$NB_USER/.jupyter/custom

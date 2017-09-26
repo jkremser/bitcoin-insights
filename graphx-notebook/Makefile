@@ -1,6 +1,6 @@
-LOCAL_IMAGE=$(USER)/bitcoin-notebook
+LOCAL_IMAGE=$(USER)/bitcoin-spark-notebook
 RANDOM := $(shell bash -c 'echo $$$$')
-TEST_CONTAINER="test-bitcoin-notebook-$(RANDOM)"
+TEST_CONTAINER="test-bitcoin-spark-notebook-$(RANDOM)"
 GRAPH_DATA ?= $(HOME)/bitcoin/output/*
 
 
@@ -16,4 +16,5 @@ clean:
 	-docker rmi -f $(LOCAL_IMAGE)
 
 run:
-	docker run --rm -ti -p 8888:8888 $(LOCAL_IMAGE)
+	-(sleep 5 && docker exec spark-notebook find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} +)&
+	docker run --name spark-notebook --rm -ti -p 9000:9000 $(LOCAL_IMAGE)
