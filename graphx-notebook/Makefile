@@ -16,5 +16,6 @@ clean:
 	-docker rmi -f $(LOCAL_IMAGE)
 
 run:
+	-docker rm -f spark-notebook || true
 	-(sleep 5 && docker exec spark-notebook find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} +)&
 	docker run --name spark-notebook --rm -ti -p 9000:9000 $(LOCAL_IMAGE)
