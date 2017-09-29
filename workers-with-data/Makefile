@@ -1,4 +1,4 @@
-LOCAL_IMAGE=$(USER)/bitcoin-spark-notebook
+LOCAL_IMAGE=$(USER)/openshift-spark-with-data
 GRAPH_DATA ?= $(HOME)/bitcoin/output/
 
 
@@ -15,6 +15,5 @@ clean:
 	-docker rmi -f $(LOCAL_IMAGE)
 
 run:
-	-docker rm -f spark-notebook || true
-	-(sleep 5 && docker exec spark-notebook find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} +)&
-	docker run --name spark-notebook --rm -ti -p 9000:9000 $(LOCAL_IMAGE)
+	-docker rm -f spark-with-data || true
+	docker run --name spark-with-data --rm -ti -p 9000:9000 $(LOCAL_IMAGE)
