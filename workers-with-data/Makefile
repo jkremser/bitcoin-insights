@@ -7,7 +7,7 @@ GRAPH_DATA ?= $(HOME)/bitcoin/output/
 build:
 	-echo -e "\n--- Copying graph data from: $(GRAPH_DATA) ---\n"
 	cp -r $(GRAPH_DATA)/{edges,nodes} .
-	echo $(GRAPH_DATA) >> ./nodes/data_from
+	#echo $(GRAPH_DATA) >> ./nodes/data_from
 	docker build -t $(LOCAL_IMAGE) .
 	-rm -rf edges nodes
 
