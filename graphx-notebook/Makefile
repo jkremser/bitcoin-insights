@@ -23,7 +23,7 @@ run:
 	docker run --name spark-notebook --rm -ti -p 9000:9000 $(LOCAL_IMAGE)
 
 open:
-	xdg-open http://localhost:9000 &> /dev/null
+	-(sleep 5.5 && firefox http://localhost:9000 &> /dev/null)&
 
 prettify:
 	cp ./blockchain.snb.ipynb ./blockchain.snb.ipynb_bak
