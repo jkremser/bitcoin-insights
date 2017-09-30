@@ -4,7 +4,7 @@ GRAPH_DATA ?= $(HOME)/bitcoin/output/
 
 .PHONY: build clean run test
 
-build:
+build: clean
 	-echo -e "\n--- Copying graph data from: $(GRAPH_DATA) ---\n"
 	cp -r $(GRAPH_DATA)/{edges,nodes} .
 	#echo $(GRAPH_DATA) >> ./nodes/data_from

@@ -4,7 +4,7 @@ GRAPH_DATA ?= $(HOME)/bitcoin/output/
 
 .PHONY: build clean run test
 
-build:
+build: clean
 	-echo -e "\n--- Copying graph data from: $(GRAPH_DATA) ---\n"
 	cp -r $(GRAPH_DATA)/{edges,nodes} .
 	#echo $(GRAPH_DATA) >> ./nodes/data_from
@@ -16,3 +16,6 @@ clean:
 
 run:
 	docker run --rm -ti -p 8888:8888 $(LOCAL_IMAGE)
+
+open:
+	xdg-open http://localhost:8888 &> /dev/null
