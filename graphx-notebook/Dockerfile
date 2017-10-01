@@ -9,5 +9,8 @@ LABEL io.k8s.description="spark-notebook Notebook with blockchain analysis." \
       io.k8s.display-name="spark-notebook Notebook with blockchain analysis." \
       io.openshift.expose-services="9000:http"
 
+USER daemon
+
 EXPOSE 9000
-ENTRYPOINT ["bin/spark-notebook"]
+
+ENTRYPOINT ["/opt/docker/bin/spark-notebook", "-Dpidfile.path=/tmp/pid"]
