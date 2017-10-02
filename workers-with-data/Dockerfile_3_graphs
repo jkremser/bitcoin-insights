@@ -1,0 +1,12 @@
+FROM radanalyticsio/openshift-spark:2.2-latest
+
+ADD nodes1 /tmp/nodes1.parquet
+ADD edges1 /tmp/edges1.parquet
+
+ADD nodes2 /tmp/nodes2.parquet
+ADD edges2 /tmp/edges2.parquet
+
+ADD nodes3 /tmp/nodes3.parquet
+ADD edges3 /tmp/edges3.parquet
+
+CMD ["/opt/spark/bin/launch.sh"]
