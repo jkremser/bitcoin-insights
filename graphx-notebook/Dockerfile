@@ -11,7 +11,8 @@ LABEL io.k8s.description="spark-notebook Notebook with blockchain analysis." \
       io.k8s.display-name="spark-notebook Notebook with blockchain analysis." \
       io.openshift.expose-services="9000:http"
 
-RUN chmod ug+rw /etc/passwd
+RUN chmod ug+rw /etc/passwd \
+    && find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} +
 
 USER daemon
 
