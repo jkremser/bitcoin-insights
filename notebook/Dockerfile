@@ -7,7 +7,9 @@ ENV NB_USER=nbuser \
     NB_UID=1011 \
     PYSPARK_DRIVER_PYTHON="jupyter" \
     PYSPARK_DRIVER_PYTHON_OPTS="notebook" \
+    SPARK_MASTER=""\
     PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11"
+
 
 EXPOSE 8888
 
@@ -44,7 +46,8 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && chmod 666 *.jar \
     && mv *.jar /opt/spark/jars/ \
     && sed -i'' -e 's/^\(exec jupyter notebook\)$/#\1/' /start.sh \
-    && echo "pyspark \$PYSPARK_SUBMIT_ARGS" >> /start.sh \
+    && echo 'ADDITIONAL_ARGS=`[[ ! -z "$SPARK_MASTER" ]] && echo "--master $SPARK_MASTER" || echo ""`' >> /start.sh \
+    && echo "pyspark \$ADDITIONAL_ARGS \$PYSPARK_SUBMIT_ARGS" >> /start.sh \
     && chown -R $NB_USER:root /home/$NB_USER /data \
     && find /home/$NB_USER -type d -exec chmod g+rwx,o+rx {} \; \
     && find /home/$NB_USER -type f -exec chmod g+rw {} \; \

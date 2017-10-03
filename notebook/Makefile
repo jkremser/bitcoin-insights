@@ -26,4 +26,5 @@ run:
 	docker run --rm -ti -p 8888:8888 $(LOCAL_IMAGE)
 
 open:
-	xdg-open http://localhost:8888 &> /dev/null
+	-(sleep 2 && xdg-open http://localhost:8888 &> /dev/null)&
+
