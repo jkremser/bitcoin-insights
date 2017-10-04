@@ -10,8 +10,8 @@ script:
   - cd parquet-converter
   - sbt ++2.11.11 clean assembly test
   #- cd ../notebook
-  #- GRAPH_DATA="../parquet-converter/data/example1/output/" make build
+  #- GRAPH_DATA=../parquet-converter/data/example1/output/ make build
   - cd ../workers-with-data
-  - GRAPH_DATA="../parquet-converter/data/example1/output/" make build
-  - cd ../graphx-notebook
-  - GRAPH_DATA="../parquet-converter/data/example1/output/" make build
+  - GRAPH_DATA=../parquet-converter/data/example1/output make build
+  #- cd ../graphx-notebook
+  #- GRAPH_DATA=../parquet-converter/data/example1/output make build
