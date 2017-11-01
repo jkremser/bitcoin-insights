@@ -20,8 +20,8 @@ ADD nodes1 /tmp/nodes1.parquet
 ADD edges1 /tmp/edges1.parquet
 ADD nodes2 /tmp/nodes2.parquet
 ADD edges2 /tmp/edges2.parquet
-ADD nodes3 /tmp/nodes3.parquet
-ADD edges3 /tmp/edges3.parquet
+#ADD nodes3 /tmp/nodes3.parquet
+#ADD edges3 /tmp/edges3.parquet
 ADD graphframes.ipynb /notebooks/graphframes.ipynb
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
 ADD custom /home/$NB_USER/.jupyter/custom
@@ -36,10 +36,10 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && echo "7628485be79eacac9e7f19bf049f581394d45ea3 `ls scala-logging-slf4j_*`" | sha1sum -c - \
     && echo "fed5521041c26b8c1daa2d5e5dc5f01b9bde4fe6 `ls scala-logging-api_*`" | sha1sum -c - \
     && su $NB_USER -c "echo \"c.NotebookApp.token = ''\" >> /home/$NB_USER/.jupyter/jupyter_notebook_config.py" \
-    && conda install -y --quiet -c conda-forge jupyter_contrib_nbextensions \
-    && jupyter nbextension enable toc2/main \
-    && jupyter nbextension enable python-markdown/main \
-    && jupyter nbextension enable init_cell/main \
+    #&& conda install -y --quiet -c conda-forge jupyter_contrib_nbextensions \
+    #&& jupyter nbextension enable toc2/main \
+    #&& jupyter nbextension enable python-markdown/main \
+    #&& jupyter nbextension enable init_cell/main \
     && jupyter trust /notebooks/blockchain.ipynb \
     && jupyter trust /notebooks/graphframes.ipynb \
     && chown 500:500 *.jar \
