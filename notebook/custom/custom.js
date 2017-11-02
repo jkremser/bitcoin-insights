@@ -11,3 +11,9 @@ var neighbors = function(graph, nodeId) {
 
 // ugly
 window.neighbors = neighbors;
+
+require(['base/js/namespace']) {
+    // setup 'ctrl-l' as shortcut for clearing current output
+    Jupyter.keyboard_manager.command_shortcuts
+           .add_shortcut('ctrl-shift-l', 'jupyter-notebook:clear-cell-output');
+}
