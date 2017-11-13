@@ -22,7 +22,7 @@ ADD nodes2 /tmp/nodes2.parquet
 ADD edges2 /tmp/edges2.parquet
 # ADD nodes3 /tmp/nodes3.parquet
 # ADD edges3 /tmp/edges3.parquet
-ADD graphframes.ipynb /notebooks/graphframes.ipynb
+# ADD graphframes.ipynb /notebooks/graphframes.ipynb
 ADD blockchain.ipynb /notebooks/blockchain.ipynb
 ADD custom /home/$NB_USER/.jupyter/custom
 ADD js /notebooks/js
@@ -38,12 +38,13 @@ RUN curl -L -O --progress-bar http://dl.bintray.com/spark-packages/maven/graphfr
     && su $NB_USER -c "echo \"c.NotebookApp.token = ''\" >> /home/$NB_USER/.jupyter/jupyter_notebook_config.py" \
     #&& conda install -y --quiet -c conda-forge jupyter_contrib_nbextensions \
     && pip install https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tarball/master \
+    && pip install networkx \
     && jupyter contrib nbextension install --user \
     && jupyter nbextension enable toc2/main \
     && jupyter nbextension enable python-markdown/main \
     && jupyter nbextension enable init_cell/main \
     && jupyter trust /notebooks/blockchain.ipynb \
-    && jupyter trust /notebooks/graphframes.ipynb \
+    # && jupyter trust /notebooks/graphframes.ipynb \
     && chown 500:500 *.jar \
     && chmod 666 *.jar \
     && mv *.jar /opt/spark/jars/ \
