@@ -1,5 +1,7 @@
 ### Building
 
+Make sure your sbt version is at least `0.13.5`
+
 ```bash
 cd 
 sbt clean assembly
