@@ -16,7 +16,7 @@ cp $HOME/.bitcoin/blocks/blk00003.dat $INPUT_DIR
 #cp $HOME/.bitcoin/blocks/blk00{0,1}{0..9}{0..9}.dat $INPUT_DIR
 #cp $HOME/.bitcoin/blocks/blk00200.dat $INPUT_DIR
 
-hadoop fs -rm -R -f $OUTPUT_DIR
+rm -Rf $OUTPUT_DIR
 
 sbt clean assembly
 
