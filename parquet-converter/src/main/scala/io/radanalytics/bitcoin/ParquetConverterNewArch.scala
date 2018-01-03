@@ -22,6 +22,7 @@
   */
 package io.radanalytics.bitcoin
 
+import io.radanalytics.bitcoin.ParquetConverter.debug
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.apache.hadoop.conf._
@@ -33,7 +34,7 @@ import org.apache.spark.sql.SparkSession
 import org.zuinnote.hadoop.bitcoin.format.common.{BitcoinTransactionOutput, _}
 import org.zuinnote.hadoop.bitcoin.format.mapreduce._
 
-object ParquetConverter {
+object ParquetConverterNewArch {
   var debug = 0;
 
   type TXHashBytes = Array[Byte]
@@ -59,56 +60,54 @@ object ParquetConverter {
     if (debug >= 1) println("\n\n\n\n\n                          ********************invoking convert()****************              \n\n\n\n\n\n\n\n")
     val bitcoinBlocksRDD = sc.newAPIHadoopFile(inputFile, classOf[BitcoinBlockFileInputFormat], classOf[BytesWritable], classOf[BitcoinBlock], hadoopConf)
 
-    // extract a tuple per transaction containing Bitcoin destination address, the input transaction hash,
-    // the input transaction output index, and the current transaction hash, the current transaction output index, a (generated) long identifier
-    val bitcoinTransactionTuples: RDD[Transaction] = bitcoinBlocksRDD.flatMap(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
-//    bitcoinTransactionTuples.cache()
+    val bitcoinTransactions: RDD[Transaction] = bitcoinBlocksRDD.flatMap(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
+//    bitcoinTransactions.cache()
 
-//    // RDD[(BytesWritable, BitcoinBlock)]
-//    val foo = bitcoinBlocksRDD.collect()
-//    println("\n\n\n\n\n" + foo.size + "\n\n\n\n")
-//    foo.foreach(hadoopKeyValueTuple => extractTransactionData(hadoopKeyValueTuple._2))
-//    println(foo)
+    if (debug >= 2) {
+      println("\n\n\n\n\n                          ********************TX****************              \n\n\n\n\n\n\n\n")
+      val transactions = bitcoinTransactions.collect()
+      println("\n\n\n\n\ntransactions.size = " + transactions.size + "\n\n\n\ntransactions:")
+      transactions.foreach(println)
+    }
 
-    // create the vertex (Bitcoin destination address, vertexId), keep in mind that the flat table contains the same bitcoin address several times
-    val bitcoinAddressIndexed: RDD[(BtcAddress, VertexId)] = bitcoinTransactionTuples.map(bitcoinTransactions => bitcoinTransactions._1).distinct().zipWithIndex()
-//    bitcoinAddressIndexed.cache()
-
-    // create the edges (bitcoinAddress,(byteArrayTransaction, TransactionIndex)
-    val inputTransactionTuple: RDD[(BtcAddress, Input)] = bitcoinTransactionTuples.map(bitcoinTransactions =>
-      (bitcoinTransactions._1, (new ByteArray(bitcoinTransactions._2), bitcoinTransactions._3)))
-
-    // (bitcoinAddress,((byteArrayTransaction, TransactionIndex),vertexId))
-    val inputTransactionTupleWithIndex: RDD[(BtcAddress, (Input, VertexId))] = inputTransactionTuple.join(bitcoinAddressIndexed)
-
-    // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
-    val inputTransactionTupleByHashIdx: RDD[(Input, VertexId)] = inputTransactionTupleWithIndex.map(iTTuple => (iTTuple._2._1, iTTuple._2._2))
-
-    val currentTransactionTuple: RDD[(BtcAddress, Output)] = bitcoinTransactionTuples.map(bitcoinTransactions =>
-      (bitcoinTransactions._1, (new ByteArray(bitcoinTransactions._4), bitcoinTransactions._5)))
-    val currentTransactionTupleWithIndex: RDD[(BtcAddress, (Output, VertexId))] = currentTransactionTuple.join(bitcoinAddressIndexed)
-
-    // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
-    val currentTransactionTupleByHashIdx: RDD[(Output, VertexId)] = currentTransactionTupleWithIndex.map { cTTuple => (cTTuple._2._1, cTTuple._2._2) }
-
-    // the join creates ((ByteArray, Idx), (srcIdx,srcAddress), (destIdx,destAddress)
-    val joinedTransactions: RDD[(TX_ID, (VertexId, VertexId))] = inputTransactionTupleByHashIdx.join(currentTransactionTupleByHashIdx)
-
-    // create vertices => vertexId,bitcoinAddress
-    val bitcoinTransactionVertices: RDD[(VertexId, BtcAddress)] = bitcoinAddressIndexed.map { case (k, v) => (v, k) }
-
-    // create edges
-    val bitcoinTransactionEdges: RDD[Edge[Int]] = joinedTransactions.map(joinTuple => Edge(joinTuple._2._1, joinTuple._2._2))
-
-    if (debug >= 1) println("\n\n\n\n\n                          ********************saving parquet files****************              \n\n\n\n\n\n\n\n")
-
-    // create two parquet files, one with nodes and second with edges
-    val spark = SparkSession
-      .builder()
-      .getOrCreate()
-    import spark.implicits._
-    bitcoinTransactionVertices.toDF().write.save(s"$outputDir/nodes")
-    bitcoinTransactionEdges.toDF().write.save(s"$outputDir/edges")
+//    // create the vertex (Bitcoin destination address, vertexId), keep in mind that the flat table contains the same bitcoin address several times
+//    val bitcoinAddressIndexed: RDD[(BtcAddress, VertexId)] = bitcoinTransactionTuples.map(bitcoinTransactions => bitcoinTransactions._1).distinct().zipWithIndex()
+//
+//    // create the edges (bitcoinAddress,(byteArrayTransaction, TransactionIndex)
+//    val inputTransactionTuple: RDD[(BtcAddress, Input)] = bitcoinTransactionTuples.map(bitcoinTransactions =>
+//      (bitcoinTransactions._1, (new ByteArray(bitcoinTransactions._2), bitcoinTransactions._3)))
+//
+//    // (bitcoinAddress,((byteArrayTransaction, TransactionIndex),vertexId))
+//    val inputTransactionTupleWithIndex: RDD[(BtcAddress, (Input, VertexId))] = inputTransactionTuple.join(bitcoinAddressIndexed)
+//
+//    // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
+//    val inputTransactionTupleByHashIdx: RDD[(Input, VertexId)] = inputTransactionTupleWithIndex.map(iTTuple => (iTTuple._2._1, iTTuple._2._2))
+//
+//    val currentTransactionTuple: RDD[(BtcAddress, Output)] = bitcoinTransactionTuples.map(bitcoinTransactions =>
+//      (bitcoinTransactions._1, (new ByteArray(bitcoinTransactions._4), bitcoinTransactions._5)))
+//    val currentTransactionTupleWithIndex: RDD[(BtcAddress, (Output, VertexId))] = currentTransactionTuple.join(bitcoinAddressIndexed)
+//
+//    // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
+//    val currentTransactionTupleByHashIdx: RDD[(Output, VertexId)] = currentTransactionTupleWithIndex.map { cTTuple => (cTTuple._2._1, cTTuple._2._2) }
+//
+//    // the join creates ((ByteArray, Idx), (srcIdx,srcAddress), (destIdx,destAddress)
+//    val joinedTransactions: RDD[(TX_ID, (VertexId, VertexId))] = inputTransactionTupleByHashIdx.join(currentTransactionTupleByHashIdx)
+//
+//    // create vertices => vertexId,bitcoinAddress
+//    val bitcoinTransactionVertices: RDD[(VertexId, BtcAddress)] = bitcoinAddressIndexed.map { case (k, v) => (v, k) }
+//
+//    // create edges
+//    val bitcoinTransactionEdges: RDD[Edge[Int]] = joinedTransactions.map(joinTuple => Edge(joinTuple._2._1, joinTuple._2._2))
+//
+//    if (debug >= 1) println("\n\n\n\n\n                          ********************saving parquet files****************              \n\n\n\n\n\n\n\n")
+//
+//    // create two parquet files, one with nodes and second with edges
+//    val spark = SparkSession
+//      .builder()
+//      .getOrCreate()
+//    import spark.implicits._
+//    bitcoinTransactionVertices.toDF().write.save(s"$outputDir/nodes")
+//    bitcoinTransactionEdges.toDF().write.save(s"$outputDir/edges")
   }
 
   // extract relevant data
@@ -117,40 +116,38 @@ object ParquetConverter {
     val blockHash: Array[Byte] = BitcoinUtil.getBlockHash(bitcoinBlock)
     val blockHashHex: String =  BitcoinUtil.convertByteArrayToHexString(blockHash)
     val rawTransactions: Array[TxData] = bitcoinBlock.getTransactions().toArray(Array[BitcoinTransaction]())
-
+    var i = 30
     rawTransactions.map((transaction: BitcoinTransaction) => {
-      transaction.getListOfInputs
-      val outputs = transaction.getListOfOutputs.toArray(Array[BitcoinTransactionOutput]()).map(output => {
-        convertBitcoinTransactionOutput2Output(output)
-      })
       val txHash: Array[Byte] = BitcoinUtil.reverseByteArray(BitcoinUtil.getTransactionHash(transaction))
       val txHashHex: String =  BitcoinUtil.convertByteArrayToHexString(txHash)
-      new Transaction(id = txHashHex, time = blockTime, block = blockHashHex, inputs = null, outputs = outputs)
+      val outputs = transaction.getListOfOutputs.toArray(Array[BitcoinTransactionOutput]()).zipWithIndex.map(output => {
+        convertBitcoinTransactionOutput2Output(output._1, txHashHex, output._2)
+      })
+
+      val inputs = transaction.getListOfInputs.toArray(Array[BitcoinTransactionInput]()).map(input => {
+        i = i - 1
+        convertBitcoinTransactionInput2Input(input)
+      })
+      new Transaction(id = txHashHex, time = blockTime, block = blockHashHex, inputs = inputs, outputs = outputs)
     })
   }
 
-  def convertBitcoinTransactionOutput2Output(output: BitcoinTransactionOutput): Output = {
-    new Output(value = output.getValue, address = null)
+  def getNiceAddress(ugly: Array[Byte]): String = {
+    val niceAddress = Option(BitcoinScriptPatternParser.getPaymentDestination(ugly))
+    val niceAddressStripped = niceAddress.map(_.stripPrefix("bitcoinaddress_"))
+    niceAddressStripped.getOrElse("unknown")
+  }
+
+  def convertBitcoinTransactionOutput2Output(output: BitcoinTransactionOutput, txHash: String, index: Long): Output = {
+    val address = getNiceAddress(output.getTxOutScript)
+    new Output(value = output.getValue, address = address, nextTx = (txHash, index))
   }
 
   def convertBitcoinTransactionInput2Input(input: BitcoinTransactionInput): Input = {
-    new Input(value = null, address = null)
+    val address = getNiceAddress(input.getTxInScript)
+    // todo: out-txs have the value associated, but input ones don't
+    val prevTxOutIndex: Long = input.getPreviousTxOutIndex
+    val prevTransactionHash: String = BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getPrevTransactionHash))
+    new Input(value = 0L, address = address, (prevTransactionHash, prevTxOutIndex))
   }
-
-
-  // todo: out-txs have the value associated, but input ones don't
-
-
 }
-
-
-/**
-  * Helper class to make byte arrays comparable
-  *
-  */
-class ByteArray(val bArray: Array[Byte]) extends Serializable {
-  override val hashCode = bArray.deep.hashCode
-
-  override def equals(obj: Any) = obj.isInstanceOf[ByteArray] && obj.asInstanceOf[ByteArray].bArray.deep == this.bArray.deep
-}
-
