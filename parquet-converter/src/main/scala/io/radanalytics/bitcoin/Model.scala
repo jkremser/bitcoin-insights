@@ -1,6 +1,6 @@
 package io.radanalytics.bitcoin
 
-class Input(val value: Long, val address: String, val prevTx: (String, Long)) extends Serializable {
+class Input(val value: Long, var address: String, val prevTx: (String, Long)) extends Serializable {
   override def toString: String = {
     s" - val=$value ; adr=$address\n"
   }

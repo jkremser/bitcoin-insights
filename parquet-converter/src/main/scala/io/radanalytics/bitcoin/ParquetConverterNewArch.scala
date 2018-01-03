@@ -40,9 +40,12 @@ object ParquetConverterNewArch {
   type TXHashBytes = Array[Byte]
   type TXHashByteArray = ByteArray
   type TXIoIndex = Long
-  type TX_ID = (TXHashByteArray, TXIoIndex)
-//  type Input = TX_ID
-//  type Output = TX_ID
+  type TXHash = String
+  type InputOrder = Long
+  type OutputOrder = Long
+//  type TX_ID = (TXHashByteArray, TXIoIndex)
+  type InputId = (TXHash, InputOrder)
+  type OutputId = (TXHash, OutputOrder)
   type BtcAddress = String
   type TxData = BitcoinTransaction
   type VertexId = Long
@@ -69,6 +72,23 @@ object ParquetConverterNewArch {
       println("\n\n\n\n\ntransactions.size = " + transactions.size + "\n\n\n\ntransactions:")
       transactions.foreach(println)
     }
+
+    val allInputs: RDD[Input] = bitcoinTransactions.flatMap(tx => tx.inputs)
+    val allOutputs: RDD[Output] = bitcoinTransactions.flatMap(tx => tx.outputs)
+
+    val inputsIndexed: RDD[((InputId), Input)] = allInputs.map(input => (input.prevTx, input))
+    val outputsIndexed: RDD[((OutputId), Output)] = allOutputs.map(output => (output.nextTx, output))
+
+    val joined: RDD[(Input, Output)] = inputsIndexed.join(outputsIndexed).values
+
+    val cajk: RDD[(Input, Output)] = joined.map(tuple => {
+      tuple._1.address = tuple._2.address
+      tuple
+    })
+
+    val addresses: RDD[String] = allOutputs.map(_.address).distinct()
+
+    // todo create edges - 2 types (tx - address), nodes - 2 types
 
 //    // create the vertex (Bitcoin destination address, vertexId), keep in mind that the flat table contains the same bitcoin address several times
 //    val bitcoinAddressIndexed: RDD[(BtcAddress, VertexId)] = bitcoinTransactionTuples.map(bitcoinTransactions => bitcoinTransactions._1).distinct().zipWithIndex()
