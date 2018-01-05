@@ -74,6 +74,13 @@ object ParquetConverterNewArch {
     }
 
     val addresses: RDD[String] = allOutputs.map(_.address).distinct()
+    if (debug >= 2) {
+      val strange = addresses.filter(a => a.contains("_"))
+      println("\n\n\n\n\n\nNON-STANDARD #: " + strange.count())
+      println("\n\n\n\n\n\nNON-STANDARD (bitcoinpubkey_)#: " + strange.filter(s => s.contains("bitcoinpubkey")).count())
+      println("\n\n\n\n\n\nNON-STANDARD  :" + strange.sample(true, 0.1).take(5).foreach(println))
+//      other possible prefixes: "puzzle_" "anyone" "unspendable"
+    }
 
     if (debug >= 1) {
       println("\n\n\n\n\n addresses: RDD[String] = \n\n")
@@ -106,6 +113,7 @@ object ParquetConverterNewArch {
     val allEdgesDF = allTransactions.map(t => (t.block, t.hash, 0L)) // block -> TX
         .union(joined.flatMap(io => if (io._2.isDefined) Array((io._1.address, io._2.get.tx, io._1.value)) else Array[(String, String, Long)]())) // address => TX
         .union(allOutputs.map(o => (o.txRef._1, o.address, o.value))) // TX -> address
+        .union(allBlocks.map(b => (b.hash, b.prevHash, 0L))) // block -> previous block
         .toDF("src", "dst", "value")
 
     allEdgesDF.write.save(s"$outputDir/edges")
@@ -114,6 +122,7 @@ object ParquetConverterNewArch {
   def extractData(bitcoinBlock: BitcoinBlock): (Block, Array[Transaction2], Array[Input], Array[Output]) = {
     val blockTime: Int = bitcoinBlock.getTime
     val blockHashHex: String = BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.getBlockHash(bitcoinBlock))
+    val prevHash: String = BitcoinUtil.convertByteArrayToHexString(bitcoinBlock.getHashPrevBlock)
     val rawTransactions: Array[TxData] = bitcoinBlock.getTransactions().toArray(Array[BitcoinTransaction]())
     val inputs: MutableList[Input] = MutableList[Input]()
     val outputs: MutableList[Output] = MutableList[Output]()
@@ -132,7 +141,7 @@ object ParquetConverterNewArch {
 
       new Transaction2(hash = txHashHex, time = blockTime, block = blockHashHex)
     })
-    val block = new Block(hash = blockHashHex, time = blockTime)
+    val block = new Block(hash = blockHashHex, prevHash = prevHash, time = blockTime)
     (block, transactions, inputs.toArray, outputs.toArray)
   }
 
