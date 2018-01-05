@@ -33,14 +33,18 @@ override def beforeAll(): Unit = {
   val ois = new ObjectInputStream(new FileInputStream("/home/jkremser/foob"))
   val input = ois.readObject.asInstanceOf[BitcoinTransactionInput]
 
-  println("\n\npicinka: " + input.getPrevTransactionHash)
-  println("\n\nkucinka: " + BitcoinScriptPatternParser.getPaymentDestination(input.getPrevTransactionHash))
-//  println("\n\nnicinka: " + input.getTxInScriptLength)
-//  println("\n\nkacinka: " + BitcoinScriptPatternParser.getPaymentDestination(input.getTxInScriptLength))
-  println("\n\nkonicinka: " + BitcoinUtil.convertByteArrayToHexString(input.getPrevTransactionHash))
-  println("\n\nfocinka: " + BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getPrevTransactionHash)))
-//  println("\n\npocinka: " + BitcoinUtil.convertByteArrayToHexString(input.getTxInScript))
-//  println("\n\nnecinka: " + BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getTxInScript)))
+  println("tx: " + input.getPrevTransactionHash)
+
+  println(BitcoinUtil.convertByteArrayToHexString(input.getTxInScript))
+
+//  println("\n\npicinka: " + input.getPrevTransactionHash)
+//  println("\n\nkucinka: " + BitcoinScriptPatternParser.getPaymentDestination(input.getPrevTransactionHash))
+////  println("\n\nnicinka: " + input.getTxInScriptLength)
+////  println("\n\nkacinka: " + BitcoinScriptPatternParser.getPaymentDestination(input.getTxInScriptLength))
+//  println("\n\nkonicinka: " + BitcoinUtil.convertByteArrayToHexString(input.getPrevTransactionHash))
+//  println("\n\nfocinka: " + BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getPrevTransactionHash)))
+////  println("\n\npocinka: " + BitcoinUtil.convertByteArrayToHexString(input.getTxInScript))
+////  println("\n\nnecinka: " + BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getTxInScript)))
 }
 
 

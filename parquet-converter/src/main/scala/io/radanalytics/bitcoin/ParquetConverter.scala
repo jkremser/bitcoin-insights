@@ -34,7 +34,7 @@ import org.zuinnote.hadoop.bitcoin.format.common._
 import org.zuinnote.hadoop.bitcoin.format.mapreduce._
 
 object ParquetConverter {
-  var debug = 0;
+  var debug = 0
 
   type TXHashBytes = Array[Byte]
   type TXHashByteArray = ByteArray
@@ -49,7 +49,7 @@ object ParquetConverter {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("Bitcoin insights - ParquetConverter)")
     val sc = new SparkContext(conf)
-    val hadoopConf = new Configuration();
+    val hadoopConf = new Configuration()
     if (args.size == 3) debug = args(2).toInt
     convert(sc, hadoopConf, args(0), args(1))
     sc.stop()
@@ -158,7 +158,7 @@ object ParquetConverter {
       }
 
     }
-    result;
+    result
   }
 
 
