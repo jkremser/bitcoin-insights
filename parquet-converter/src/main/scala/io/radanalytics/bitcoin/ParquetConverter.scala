@@ -34,7 +34,7 @@ import org.zuinnote.hadoop.bitcoin.format.common._
 import org.zuinnote.hadoop.bitcoin.format.mapreduce._
 
 object ParquetConverter {
-  var debug = 0;
+  var debug = 0
 
   type TXHashBytes = Array[Byte]
   type TXHashByteArray = ByteArray
@@ -49,7 +49,7 @@ object ParquetConverter {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("Bitcoin insights - ParquetConverter)")
     val sc = new SparkContext(conf)
-    val hadoopConf = new Configuration();
+    val hadoopConf = new Configuration()
     if (args.size == 3) debug = args(2).toInt
     convert(sc, hadoopConf, args(0), args(1))
     sc.stop()
@@ -82,23 +82,23 @@ object ParquetConverter {
     val inputTransactionTupleWithIndex: RDD[(BtcAddress, (Input, VertexId))] = inputTransactionTuple.join(bitcoinAddressIndexed)
 
     // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
-    val inputTransactionTupleByHashIdx: RDD[(Input, (VertexId, BtcAddress))] = inputTransactionTupleWithIndex.map(iTTuple => (iTTuple._2._1, (iTTuple._2._2, iTTuple._1)))
+    val inputTransactionTupleByHashIdx: RDD[(Input, VertexId)] = inputTransactionTupleWithIndex.map(iTTuple => (iTTuple._2._1, iTTuple._2._2))
 
     val currentTransactionTuple: RDD[(BtcAddress, Output)] = bitcoinTransactionTuples.map(bitcoinTransactions =>
       (bitcoinTransactions._1, (new ByteArray(bitcoinTransactions._4), bitcoinTransactions._5)))
     val currentTransactionTupleWithIndex: RDD[(BtcAddress, (Output, VertexId))] = currentTransactionTuple.join(bitcoinAddressIndexed)
 
     // (byteArrayTransaction, TransactionIndex), (vertexId, bitcoinAddress)
-    val currentTransactionTupleByHashIdx: RDD[(Output, (VertexId, BtcAddress))] = currentTransactionTupleWithIndex.map { cTTuple => (cTTuple._2._1, (cTTuple._2._2, cTTuple._1)) }
+    val currentTransactionTupleByHashIdx: RDD[(Output, VertexId)] = currentTransactionTupleWithIndex.map { cTTuple => (cTTuple._2._1, cTTuple._2._2) }
 
     // the join creates ((ByteArray, Idx), (srcIdx,srcAddress), (destIdx,destAddress)
-    val joinedTransactions: RDD[(TX_ID, ((VertexId, BtcAddress), (VertexId, BtcAddress)))] = inputTransactionTupleByHashIdx.join(currentTransactionTupleByHashIdx)
+    val joinedTransactions: RDD[(TX_ID, (VertexId, VertexId))] = inputTransactionTupleByHashIdx.join(currentTransactionTupleByHashIdx)
 
     // create vertices => vertexId,bitcoinAddress
     val bitcoinTransactionVertices: RDD[(VertexId, BtcAddress)] = bitcoinAddressIndexed.map { case (k, v) => (v, k) }
 
     // create edges
-    val bitcoinTransactionEdges: RDD[Edge[String]] = joinedTransactions.map(joinTuple => Edge(joinTuple._2._1._1, joinTuple._2._2._1, "input"))
+    val bitcoinTransactionEdges: RDD[Edge[Int]] = joinedTransactions.map(joinTuple => Edge(joinTuple._2._1, joinTuple._2._2))
 
     if (debug >= 1) println("\n\n\n\n\n                          ********************saving parquet files****************              \n\n\n\n\n\n\n\n")
 
@@ -138,26 +138,27 @@ object ParquetConverter {
           val currentTransactionOutput = currentTransaction.getListOfOutputs().get(k)
           val currentTransactionOutputIndex = k.toLong
 
-          // example of multi-input multi-output tx: https://blockchain.info/tx/7c666411f52a2515f0593fc7ccd6e50a6b24150eb73df4b37fc8c1e174f5da15
+          val btcAddress = BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()).stripPrefix("bitcoinaddress_")
 
+          // example of multi-input multi-output tx: https://blockchain.info/tx/7c666411f52a2515f0593fc7ccd6e50a6b24150eb73df4b37fc8c1e174f5da15
           // example of 'normal' tx: https://blockchain.info/tx/fb308839d7410a9b5ee9f4a7a36ab38908219d14141b607965640edf727445d1
           // i.e. 1 sender, 1 receiver and sending back the rest
           if (debug >= 2) {
             println("\n\n\n\n\n                          ********************TX****************              \n\n\n\n\n\n\n\n")
             println("currentTransactionInputHash = " + currentTransactionInputHash)
             println("currentTransactionHash = " + currentTransactionHash)
-            println("paymentDestination = " + BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()))
+            println("paymentDestination = " + btcAddress)
             println("currentTransactionOutputIndex = " + currentTransactionOutputIndex)
             println("value = " + currentTransactionOutput.getValue())
           }
 
-          result(resultCounter) = (BitcoinScriptPatternParser.getPaymentDestination(currentTransactionOutput.getTxOutScript()), currentTransactionInputHash, currentTransactionInputOutputIndex, currentTransactionHash, currentTransactionOutputIndex)
+          result(resultCounter) = (btcAddress, currentTransactionInputHash, currentTransactionInputOutputIndex, currentTransactionHash, currentTransactionOutputIndex)
           resultCounter += 1
         }
       }
 
     }
-    result;
+    result
   }
 
 

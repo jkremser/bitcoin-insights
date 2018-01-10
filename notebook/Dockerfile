@@ -16,10 +16,10 @@ EXPOSE 8888
 USER $NB_UID
 RUN mkdir /tmp/data/
 
-ADD nodes1 /tmp/nodes1.parquet
-ADD edges1 /tmp/edges1.parquet
-ADD nodes2 /tmp/nodes2.parquet
-ADD edges2 /tmp/edges2.parquet
+ADD addresses /tmp/addresses.parquet
+ADD blocks /tmp/blocks.parquet
+ADD transactions /tmp/transactions.parquet
+ADD edges /tmp/edges.parquet
 # ADD nodes3 /tmp/nodes3.parquet
 # ADD edges3 /tmp/edges3.parquet
 # ADD graphframes.ipynb /notebooks/graphframes.ipynb
