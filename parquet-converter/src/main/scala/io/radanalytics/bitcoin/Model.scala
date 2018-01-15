@@ -55,6 +55,6 @@ case class Transaction2(val hash: String, val time: Int, val block: String) exte
 
 case class Block(val hash: String, val prevHash: String, val time: Int) extends Serializable {
   override def toString: String = {
-    s"block id:    $hash\ntime:    ${new java.util.Date(time * 1000L).toString}\n"
+    s"block id:    $hash\ntime:    ${new java.util.Date(time * 1000L).toString}\n prev: $prevHash\n"
   }
 }

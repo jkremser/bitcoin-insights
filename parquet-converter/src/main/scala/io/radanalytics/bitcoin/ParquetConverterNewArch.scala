@@ -131,7 +131,7 @@ object ParquetConverterNewArch {
   def extractData(bitcoinBlock: BitcoinBlock): (Block, Array[Transaction2], Array[Input], Array[Output]) = {
     val blockTime: Int = bitcoinBlock.getTime
     val blockHashHex: String = BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.getBlockHash(bitcoinBlock))
-    val prevHash: String = BitcoinUtil.convertByteArrayToHexString(bitcoinBlock.getHashPrevBlock)
+    val prevHash: String = BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(bitcoinBlock.getHashPrevBlock))
     val rawTransactions: Array[TxData] = bitcoinBlock.getTransactions().toArray(Array[BitcoinTransaction]())
     val inputs: MutableList[Input] = MutableList[Input]()
     val outputs: MutableList[Output] = MutableList[Output]()
