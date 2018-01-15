@@ -71,7 +71,7 @@ object ParquetConverterDS {
     // note: distinct causes shuffle
     val addressesCached: RDD[String] = allOutputs.map(_.address).distinct.cache
     val addresses: RDD[(String, VertexOrderId)] = addressesCached.zipWithIndex()
-    val addressesDS: Dataset[(String, VertexOrderId)] = spark.createDataset(addresses)
+    val addressesDS: Dataset[(String, VertexOrderId)] = spark.createDataset(addresses).cache
     if (debug >= 2) {
       val strange = addresses.filter(a => a._1.contains("_"))
       println("\n\n\n\n\n\nNON-STANDARD #: " + strange.count())
@@ -97,23 +97,17 @@ object ParquetConverterDS {
 
     val allTransactionsCached: RDD[Transaction2] = blockchainDataRDD.flatMap(t => t._2).cache
     val allTransactions: RDD[(Transaction2, TransactionOrderId)] = allTransactionsCached.zipWithIndex()
-    val allTransactionsDS: Dataset[(Transaction2, TransactionOrderId)] = spark.createDataset(allTransactions)
+    val allTransactionsDS: Dataset[(Transaction2, TransactionOrderId)] = spark.createDataset(allTransactions).cache
 
 
     val addressesDF: DataFrame = addressesDS.map(a => (a._2, a._1)).toDF("id", "address")
-//    addressesDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/addresses_no_compression")
-    addressesDF.coalesce(32).write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/addresses_gzip")
-//    addressesDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/addresses_snappy")
+    addressesDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/addresses")
 
     val allBlocksDF = allBlocksDS.map(b => (b._2, b._1.hash, b._1.time)).toDF("id", "hash", "time")
-//    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/blocks_no_compression")
-    allBlocksDF.coalesce(32).write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/blocks_gzip")
-//    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/blocks_snappy")
+    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/blocks")
 
     val allTransactionsDF = allTransactionsDS.map(t => (t._2, t._1.hash)).toDF("id", "hash")
-//    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/transactions_no_compression")
-    allTransactionsDF.coalesce(32).write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/transactions_gzip")
-//    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/transactions_snappy")
+    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/transactions")
 
     // |address|txRef|ord|value| : long, long, long, long
     val allOutputsAux: DataFrame = allOutputsDS.join(addressesDS, allOutputsDS("address") === addressesDS("_1"))
@@ -133,21 +127,16 @@ object ParquetConverterDS {
       println("\n\n\n\n\n allInputsDS = \n\n")
       allInputsDS.sample(true, 0.001).take(5).foreach(println)
       allInputsDS.show
-
       println("step0:\n\n")
       println("allInputsDS:\n\n")
       allInputsDS.show
-
-
       println("step1:\n\n")
       allInputsDS.join(allTransactionsDS, $"txOutputRef.hash" === $"_1.hash")
         .show
-
       println("step1.5:\n\n")
       allInputsDS.join(allTransactionsDS, $"txOutputRef.hash" === $"_1.hash")
         .select($"_2".as("txOutputRef"), $"txOutputRef.ord", $"tx")
         .show
-
       println("step2:\n\n")
       allInputsDS.join(allTransactionsDS, $"txOutputRef.hash" === $"_1.hash")
         .select($"_2".as("txOutputRef"), $"txOutputRef.ord", $"tx")
@@ -178,12 +167,16 @@ object ParquetConverterDS {
     val txAddressEdges = allOutputsAux.select($"txRef", $"address", $"value")
     printCount("txAddressEdges", txAddressEdges)
 
+    // clear caches that are not needed anymore
+//    allBlocksCached.unpersist(true)
+//    addressesCached.unpersist(true)
+//    addressesDS.unpersist(true)
+
     // address => TX (inputs)
     val addressTxEdges = allOutputsAux.alias("ds1")
       .join(allInputsAux.alias("ds2"), $"txOutputRef" === $"txRef" && $"ds1.ord" === $"ds2.ord")
       .select($"address", $"tx", $"value")
     printCount("addressTxEdges", addressTxEdges)
-
 
     val allEdgesDF = blockTxEdges
         .union(addressTxEdges)
@@ -191,9 +184,7 @@ object ParquetConverterDS {
         .union(blockBlockEdges)
         .toDF("src", "dst", "value")
 
-//    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/edges_no_compression")
-    allEdgesDF.coalesce(32).write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/edges_gzip")
-//    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/edges_snappy")
+    allEdgesDF.repartition(2).write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/edges")
   }
 
   def extractData(bitcoinBlock: BitcoinBlock): (Block, Array[Transaction2], Array[Input2], Array[Output2]) = {

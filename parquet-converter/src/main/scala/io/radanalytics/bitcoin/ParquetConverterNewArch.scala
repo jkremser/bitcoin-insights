@@ -98,19 +98,13 @@ object ParquetConverterNewArch {
     import spark.implicits._
 
     val addressesDF: DataFrame = addresses.toDF("address")
-    addressesDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/addresses_no_compression")
-    addressesDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/addresses_gzip")
-    addressesDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/addresses_snappy")
+    addressesDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/addresses")
 
     val allBlocksDF = allBlocks.map(b => (b.hash, b.time)).toDF("hash", "time")
-    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/blocks_no_compression")
-    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/blocks_gzip")
-    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/blocks_snappy")
+    allBlocksDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/blocks")
 
     val allTransactionsDF = allTransactions.map(t => (t.hash)).toDF("hash")
-    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/transactions_no_compression")
-    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/transactions_gzip")
-    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/transactions_snappy")
+    allTransactionsDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/transactions")
 
     if (debug >= 2) {
       println("\n\n\n\n\n allOutputs.map(o => (o.txRef._1, o.address, o.value)) = \n\n")
@@ -123,9 +117,7 @@ object ParquetConverterNewArch {
         .union(allBlocks.map(b => (b.hash, b.prevHash, 0L))) // block -> previous block
         .toDF("src", "dst", "value")
 
-    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "none").mode("overwrite").save(s"$outputDir/edges_no_compression")
-    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/edges_gzip")
-    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "snappy").mode("overwrite").save(s"$outputDir/edges_snappy")
+    allEdgesDF.write.mode("overwrite").format("parquet").option("compression", "gzip").mode("overwrite").save(s"$outputDir/edges")
   }
 
   def extractData(bitcoinBlock: BitcoinBlock): (Block, Array[Transaction2], Array[Input], Array[Output]) = {
