@@ -36,11 +36,11 @@ assemblyJarName in assembly := "bitcoin-insights.jar"
 
 libraryDependencies += "com.github.zuinnote" % "hadoopcryptoledger-fileformat" % "1.0.4" % "compile"
 
-libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0" % "provided" withSources() withJavadoc()
 
-libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.2.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-graphx" % "2.2.0" % "provided" withSources() withJavadoc()
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided" withSources() withJavadoc()
 
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.7.0" % "provided"
 
