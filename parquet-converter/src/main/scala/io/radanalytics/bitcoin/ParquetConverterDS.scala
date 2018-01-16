@@ -48,6 +48,8 @@ object ParquetConverterDS {
   }
 
   def convert(sc: SparkContext, hadoopConf: Configuration, inputFile: String, outputDir: String) = {
+    // TODO: !!! currently all the entities have ids from the same range, so there are collisions
+
     val spark = SparkSession
       .builder()
       .getOrCreate()
