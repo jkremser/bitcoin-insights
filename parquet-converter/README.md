@@ -3,25 +3,27 @@
 Make sure your sbt version is at least `0.13.5`
 
 ```bash
-cd 
+cd
 sbt clean assembly
 ```
 will create a jar file in `./target/scala-2.11/bitcoin-insights.jar`
 
 ### Running
 
-Converter assumes the data in the HDFS and writes two parquet files (one with nodes and one with edges) back to the HDFS. Depending on the size of the task, or in other words, how many blocks you want to convert, tweak the memory parameters of the following command:
+Converter assumes the binary block data in the input directory and writes parquet files to the output directory. Paths to input and output directories are passed to the converter. Depending on the size of the task, or in other words, how many blocks you want to convert, tweak the memory parameters of the following example command:
 ```bash
+ls ~/bitcoin/input/
+# blk00003.dat
+
 spark-submit \
   --driver-memory 2G \
   --executor-memory 2G \
   --class io.radanalytics.bitcoin.ParquetConverter \
   --master local[8] \
-  ./target/scala-2.11/bitcoin-insights.jar /user/cloudera/bitcoin/input /user/cloudera/bitcoin/output
-```
+  ./target/scala-2.11/bitcoin-insights.jar ~/bitcoin/input ~/bitcoin/output
 
-Also make sure the `/user/cloudera/bitcoin/output` is empty before running the previous command:
+# ... <output from the conversion> ...
 
-```bash
-hadoop fs -rm -R -f /user/cloudera/bitcoin/output/
+ls ~/bitcoin/output
+# addresses  blocks  edges  transactions
 ```
