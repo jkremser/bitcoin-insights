@@ -8,7 +8,7 @@ ENV NB_USER=nbuser \
     PYSPARK_DRIVER_PYTHON="jupyter" \
     PYSPARK_DRIVER_PYTHON_OPTS="notebook" \
     SPARK_MASTER=""\
-    PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11"
+    PYSPARK_SUBMIT_ARGS="--packages graphframes:graphframes:0.5.0-spark2.1-s_2.11 --driver-memory 4G"
 
 
 EXPOSE 8888
