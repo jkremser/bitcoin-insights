@@ -18,6 +18,8 @@ cp $HOME/.bitcoin/blocks/blk00003.dat $INPUT_DIR
 
 rm -Rf $OUTPUT_DIR
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pushd $DIR
 sbt clean assembly
 
 spark-submit \
@@ -28,3 +30,5 @@ spark-submit \
   --conf "spark.executor.extraJavaOptions=-XX:+PrintGCDetails -XX:+PrintGCTimeStamps" \
   --conf "spark.local.dir=$HOME/tmp" \
   ./target/scala-2.11/bitcoin-insights.jar $INPUT_DIR $OUTPUT_DIR $@
+
+  popd
