@@ -6,11 +6,11 @@ GRAPH_DATA ?= $(HOME)/bitcoin/output/
 
 build: clean prettify
 	-echo -e "\n--- Copying graph data from: $(GRAPH_DATA) ---\n"
-	cp -r $(GRAPH_DATA)/{edges,nodes} .
+	cp -r $(GRAPH_DATA)/* .
 	-sed -i'_bak' "s/\([[:space:]]*\"name\": \"Blockchain\".*\)/\1 \"data-info\": \""$${GRAPH_DATA#*-}"\",/g" blockchain.snb.ipynb
 	# $(MAKE) -f $(THIS_FILE) prettify
 	docker build -t $(LOCAL_IMAGE) .
-	-rm -rf edges nodes
+	-rm -rf edges addresses blocks transactions
 	-mv blockchain.snb.ipynb_bak blockchain.snb.ipynb
 
 clean:
