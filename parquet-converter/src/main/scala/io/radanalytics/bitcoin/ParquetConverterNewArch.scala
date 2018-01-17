@@ -146,19 +146,15 @@ object ParquetConverterNewArch {
     (block, transactions, inputs.toArray, outputs.toArray)
   }
 
-  def getNiceAddress(ugly: Array[Byte]): String = {
-    val niceAddress = Option(BitcoinScriptPatternParser.getPaymentDestination(ugly))
-    val niceAddressStripped = niceAddress.map(_.stripPrefix("bitcoinaddress_"))
-    niceAddressStripped.getOrElse("unknown")
-  }
+
 
   def convertBitcoinTransactionOutput2Output(output: BitcoinTransactionOutput, txHash: String, index: Long): Output = {
-    val address = getNiceAddress(output.getTxOutScript)
+    val address = ConverterUtil.getNiceAddress(output.getTxOutScript)
     new Output(value = output.getValue, address = address, txRef = (txHash, index))
   }
 
   def convertBitcoinTransactionInput2Input(input: BitcoinTransactionInput, txHash: String): Input = {
-    val address = getNiceAddress(input.getTxInScript)
+    val address = ConverterUtil.getNiceAddress(input.getTxInScript)
     val prevTxOutIndex: Long = input.getPreviousTxOutIndex
     val prevTransactionHash: String = BitcoinUtil.convertByteArrayToHexString(BitcoinUtil.reverseByteArray(input.getPrevTransactionHash))
     new Input(value = 0L, address = address, (prevTransactionHash, prevTxOutIndex), txHash)
