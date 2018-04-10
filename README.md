@@ -3,6 +3,14 @@
 [![Docker build](https://img.shields.io/docker/automated/jkremser/bitcoin-notebook.svg)](https://hub.docker.com/r/jkremser/bitcoin-notebook)
 [![Layers info](https://images.microbadger.com/badges/image/jkremser/bitcoin-notebook.svg)](https://microbadger.com/images/jkremser/bitcoin-notebook)
 
+## Quick start
+Follow the tutorial on https://radanalytics.io/examples/blockchain
+
+or for ultra-quick-start with some prepared data just run:
+```bash
+docker run --rm -ti -p 9000:9000 jkremser/bitcoin-spark-notebook:tutorial-1.0.0
+```
+
 ## Converter to Parguet
 
 Bitcoin stores all the transactions in the binary format described [here](https://webbtc.com/api/schema), however Spark is much better with columnar data formats such as Parquet, so we provide a simple converter from the Blockchain binary format into parquet files. The converter was inspired by the examples in the [hadoopcryptoledger](https://github.com/ZuInnoTe/hadoopcryptoledger/wiki/Using-Hive-to-analyze-Bitcoin-Blockchain-data) project and uses some of its classes for parsing the original format.
