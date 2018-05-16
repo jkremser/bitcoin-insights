@@ -17,9 +17,12 @@ LABEL io.k8s.description="spark-notebook Notebook with blockchain analysis." \
 RUN chmod ug+rw /etc/passwd \
     && chmod o+w /usr/sbin/ \
     && chown daemon:daemon /opt/docker/notebooks/blockchain.snb.ipynb \
-    && find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} +
+    && find /opt/docker/notebooks/ ! -path /opt/docker/notebooks/ -type d -exec rm -rf {} + \
+    && apt-get update \
+    && apt-get install -y python \
+    && apt-get clean all
 
 USER daemon
 
-EXPOSE 9000
+EXPOSE 9000 8000
 ENTRYPOINT ["/entrypoint.sh", "/opt/docker/bin/spark-notebook", "-Dpidfile.path=/tmp/pid"]
