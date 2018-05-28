@@ -1,6 +1,8 @@
-FROM radanalyticsio/openshift-spark:2.2-latest
+FROM radanalyticsio/openshift-spark:2.3-latest
 
-ADD nodes /tmp/nodes.parquet
+ADD addresses /tmp/addresses.parquet
+ADD blocks /tmp/blocks.parquet
+ADD transactions /tmp/transactions.parquet
 ADD edges /tmp/edges.parquet
 
 CMD ["/opt/spark/bin/launch.sh"]
